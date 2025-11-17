@@ -7,4 +7,6 @@ Optimized for embedded systems: automatic data type selection (uint8_t, int8_t, 
 
 🔗 [Curve to Array Generator](https://claude.ai/public/artifacts/79b34e4a-709f-4469-b3a8-b138d0874859) 
 
+![ScreenDemo](https://github.com/user-attachments/assets/93b8e7c6-feea-4e7e-ab8c-9bc70fd33e70)
+
 Made with Claude.ai
