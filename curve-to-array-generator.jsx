@@ -24,9 +24,12 @@ export default function CurveGenerator() {
 
   // Determine optimal data type
   const getDataType = (min, max) => {
-    if (min >= 0 && max <= 255) return 'uint8_t';
-    if (min >= -128 && max <= 127) return 'int8_t';
-    if (min >= 0 && max <= 65535) return 'uint16_t';
+    const actualMin = Math.min(min, max);
+    const actualMax = Math.max(min, max);
+    
+    if (actualMin >= 0 && actualMax <= 255) return 'uint8_t';
+    if (actualMin >= -128 && actualMax <= 127) return 'int8_t';
+    if (actualMin >= 0 && actualMax <= 65535) return 'uint16_t';
     return 'int16_t';
   };
 
@@ -222,7 +225,12 @@ export default function CurveGenerator() {
     
     // Calculate relative position
     const x = (e.clientX - rect.left) / rect.width;
-    const y = 1 - (e.clientY - rect.top) / rect.height;
+    let y = 1 - (e.clientY - rect.top) / rect.height;
+    
+    // If min > max, the chart is inverted, so we need to invert y
+    if (minValue > maxValue) {
+      y = 1 - y;
+    }
     
     // Clamp values
     const clampedX = Math.max(0.1, Math.min(0.9, x));
