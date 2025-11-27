@@ -5,6 +5,8 @@ import { Copy, Check } from 'lucide-react';
 export default function CurveGenerator() {
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(255);
+  const [minValueInput, setMinValueInput] = useState('0');
+  const [maxValueInput, setMaxValueInput] = useState('255');
   const [numPoints, setNumPoints] = useState(128);
   const [curvature, setCurvature] = useState(1);
   const [curveType, setCurveType] = useState('exponential');
@@ -34,6 +36,33 @@ export default function CurveGenerator() {
   };
 
   const dataType = getDataType(minValue, maxValue);
+
+  // Handle min/max value updates
+  const handleMinValueChange = (value) => {
+    setMinValueInput(value);
+  };
+
+  const handleMaxValueChange = (value) => {
+    setMaxValueInput(value);
+  };
+
+  const applyMinValue = () => {
+    const num = Number(minValueInput);
+    if (!isNaN(num)) {
+      setMinValue(num);
+    } else {
+      setMinValueInput(String(minValue));
+    }
+  };
+
+  const applyMaxValue = () => {
+    const num = Number(maxValueInput);
+    if (!isNaN(num)) {
+      setMaxValue(num);
+    } else {
+      setMaxValueInput(String(maxValue));
+    }
+  };
 
   // Interpolation function for custom midpoint with curvature
   const interpolateWithMidpoint = (t, midX, midY, curveLeft, curvatureLeft, curveRight, curvatureRight, invertL, invertR) => {
@@ -233,7 +262,7 @@ export default function CurveGenerator() {
     }
     
     // Clamp values
-    const clampedX = Math.max(0.1, Math.min(0.9, x));
+    const clampedX = Math.max(0.05, Math.min(0.95, x));
     const clampedY = Math.max(0, Math.min(1, y));
     
     setMidpointX(clampedX);
@@ -242,13 +271,6 @@ export default function CurveGenerator() {
 
   const handleMouseUp = () => {
     setIsDragging(false);
-  };
-
-  // Get curve type label
-  const getCurveTypeLabel = () => {
-    if (curvature < 1) return 'gentle';
-    if (curvature > 1) return 'steep';
-    return 'linear';
   };
 
   return (
@@ -272,18 +294,32 @@ export default function CurveGenerator() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Min Value</label>
                   <input
-                    type="number"
-                    value={minValue}
-                    onChange={(e) => setMinValue(Number(e.target.value))}
+                    type="text"
+                    value={minValueInput}
+                    onChange={(e) => handleMinValueChange(e.target.value)}
+                    onBlur={applyMinValue}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        applyMinValue();
+                        e.target.blur();
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Max Value</label>
                   <input
-                    type="number"
-                    value={maxValue}
-                    onChange={(e) => setMaxValue(Number(e.target.value))}
+                    type="text"
+                    value={maxValueInput}
+                    onChange={(e) => handleMaxValueChange(e.target.value)}
+                    onBlur={applyMaxValue}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        applyMaxValue();
+                        e.target.blur();
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
@@ -329,10 +365,7 @@ export default function CurveGenerator() {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  {useMidpoint ? 'Curve 1: ' : 'Curvature: '}{curvature.toFixed(2)} 
-                  <span className="ml-2 text-gray-400 text-xs">
-                    ({getCurveTypeLabel()})
-                  </span>
+                  {useMidpoint ? 'Curve 1: ' : 'Curvature: '}{curvature.toFixed(2)}
                 </label>
                 <input
                   type="range"
@@ -413,11 +446,12 @@ export default function CurveGenerator() {
               </div>
 
               <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className={`flex items-center gap-2 cursor-pointer ${addProgmem ? 'opacity-50' : ''}`}>
                   <input
                     type="checkbox"
                     checked={addConst}
                     onChange={(e) => setAddConst(e.target.checked)}
+                    disabled={addProgmem}
                     className="w-4 h-4"
                   />
                   <span>const</span>
@@ -466,6 +500,7 @@ export default function CurveGenerator() {
                   />
                   <Line 
                     type="monotone" 
+                    isAnimationActive={false}
                     dataKey="y" 
                     stroke="#3B82F6" 
                     strokeWidth={2}
